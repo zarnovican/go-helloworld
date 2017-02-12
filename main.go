@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"log/syslog"
 	"net/http"
@@ -8,9 +9,10 @@ import (
 )
 
 type Config struct {
-	LOG_TARGET   string
-	PORT         string
-	SERVICE_NAME string
+	DOCKER_TASK_SLOT string
+	LOG_TARGET       string
+	PORT             string
+	SERVICE_NAME     string
 }
 
 var config *Config
@@ -24,6 +26,7 @@ var (
 
 func loadConfig() *Config {
 	ret := &Config{}
+	ret.DOCKER_TASK_SLOT = os.Getenv("DOCKER_TASK_SLOT")
 	ret.LOG_TARGET = os.Getenv("LOG_TARGET")
 	if ret.LOG_TARGET == "" {
 		ret.LOG_TARGET = "console"
@@ -73,6 +76,18 @@ func root(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte("hello\n"))
 }
 
+func get_info(w http.ResponseWriter, req *http.Request) {
+	iam := config.SERVICE_NAME
+	if config.DOCKER_TASK_SLOT != "" {
+		iam = iam + "." + config.DOCKER_TASK_SLOT
+	}
+	hostname, err := os.Hostname()
+	if err != nil {
+		hostname = "<unknown>"
+	}
+	w.Write([]byte(fmt.Sprintf("%s (<version>) on %s: your IP %s\n", iam, hostname, req.RemoteAddr)))
+}
+
 func main() {
 	config = loadConfig()
 	if config.LOG_TARGET == "syslog" {
@@ -80,6 +95,7 @@ func main() {
 		setupSyslog()
 	}
 	http.HandleFunc("/", root)
+	http.HandleFunc("/info", get_info)
 
 	debug.Print("sample Debug message")
 	info.Print("sample Info message")
