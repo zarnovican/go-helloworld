@@ -19,6 +19,9 @@ type Config struct {
 
 var config Config
 
+// Set at build time.
+var GitDescribe = "snapshot"
+
 var (
 	debug   = log.New(os.Stderr, "DEBUG ", log.LstdFlags|log.Lshortfile)
 	info    = log.New(os.Stderr, "INFO ", log.LstdFlags|log.Lshortfile)
@@ -69,7 +72,7 @@ func get_info(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		hostname = "<unknown>"
 	}
-	w.Write([]byte(fmt.Sprintf("%s (<version>) on %s: your IP %s\n", iam, hostname, req.RemoteAddr)))
+	w.Write([]byte(fmt.Sprintf("%s (%s) on %s: your IP %s\n", iam, GitDescribe, hostname, req.RemoteAddr)))
 }
 
 func main() {

@@ -1,2 +1,5 @@
-FROM golang:onbuild
-EXPOSE 8080
+FROM scratch
+
+ADD go-helloworld /
+
+ENTRYPOINT ["/go-helloworld"]
