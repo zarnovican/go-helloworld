@@ -6,16 +6,18 @@ import (
 	"log/syslog"
 	"net/http"
 	"os"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
-	DOCKER_TASK_SLOT string
-	LOG_TARGET       string
-	PORT             string
-	SERVICE_NAME     string
+	DOCKER_TASK_SLOT string `envconfig:"DOCKER_TASK_SLOT" default:"1"`
+	LOG_TARGET       string `envconfig:"LOG_TARGET" default:"console"`
+	PORT             string `envconfig:"PORT" default:"8080"`
+	SERVICE_NAME     string `envconfig:"SERVICE_NAME" default:"helloworld"`
 }
 
-var config *Config
+var config Config
 
 var (
 	debug   = log.New(os.Stderr, "DEBUG ", log.LstdFlags|log.Lshortfile)
@@ -23,24 +25,6 @@ var (
 	warning = log.New(os.Stderr, "WARNING ", log.LstdFlags|log.Lshortfile)
 	err     = log.New(os.Stderr, "ERROR ", log.LstdFlags|log.Lshortfile)
 )
-
-func loadConfig() *Config {
-	ret := &Config{}
-	ret.DOCKER_TASK_SLOT = os.Getenv("DOCKER_TASK_SLOT")
-	ret.LOG_TARGET = os.Getenv("LOG_TARGET")
-	if ret.LOG_TARGET == "" {
-		ret.LOG_TARGET = "console"
-	}
-	ret.PORT = os.Getenv("PORT")
-	if ret.PORT == "" {
-		ret.PORT = "8080"
-	}
-	ret.SERVICE_NAME = os.Getenv("SERVICE_NAME")
-	if ret.SERVICE_NAME == "" {
-		ret.SERVICE_NAME = "helloworld"
-	}
-	return ret
-}
 
 func setupSyslog() {
 	var logger *syslog.Writer
@@ -89,7 +73,10 @@ func get_info(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	config = loadConfig()
+	e := envconfig.Process("helloworld", &config)
+	if e != nil {
+		log.Fatal(e.Error())
+	}
 	if config.LOG_TARGET == "syslog" {
 		info.Printf("Logging is redirected to systemd journal. Tail with \"journalctl -t %s -f\"", config.SERVICE_NAME)
 		setupSyslog()
