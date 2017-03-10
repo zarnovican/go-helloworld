@@ -90,5 +90,9 @@ func main() {
 	err.Print("sample Error message\nfoo\n    bar\nfoo2\n    bar2")
 
 	info.Printf("Listening on 0.0.0.0:%s", config.PORT)
-	http.ListenAndServe(":"+config.PORT, nil)
+	e = http.ListenAndServe(":"+config.PORT, nil)
+	if e != nil {
+		err.Print(e.Error())
+		log.Fatal(e.Error())
+	}
 }
