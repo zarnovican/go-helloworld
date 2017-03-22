@@ -61,7 +61,7 @@ func setupSyslog() {
 }
 
 func root(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte("hello\n"))
+	w.Write([]byte("Hello!\n"))
 }
 
 func get_info(w http.ResponseWriter, req *http.Request) {
