@@ -6,6 +6,7 @@ import (
 	"log/syslog"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -75,6 +76,23 @@ func get_info(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(fmt.Sprintf("Go %s (%s) on %s: your IP %s\n", iam, GitDescribe, hostname, req.RemoteAddr)))
 }
 
+func log_sample(w http.ResponseWriter, req *http.Request) {
+	debug.Print("called /log/<foo> endpoint")
+
+	if strings.HasSuffix(req.URL.Path, "/info") {
+		info.Print("sample Info message")
+	} else if strings.HasSuffix(req.URL.Path, "/warning") {
+		warning.Print("sample Warning message")
+	} else if strings.HasSuffix(req.URL.Path, "/error") {
+		err.Print("sample Error message\nfoo\n    bar\nfoo2\n    bar2")
+	} else {
+		err.Printf("path %s not found", req.URL.Path)
+		w.Write([]byte("not found\n"))
+		return
+	}
+	w.Write([]byte("ok\n"))
+}
+
 func main() {
 	e := envconfig.Process("helloworld", &config)
 	if e != nil {
@@ -86,11 +104,7 @@ func main() {
 	}
 	http.HandleFunc("/", root)
 	http.HandleFunc("/info", get_info)
-
-	debug.Print("sample Debug message")
-	info.Print("sample Info message")
-	warning.Print("sample Warning message")
-	err.Print("sample Error message\nfoo\n    bar\nfoo2\n    bar2")
+	http.HandleFunc("/log/", log_sample)
 
 	info.Printf("Listening on 0.0.0.0:%s", config.PORT)
 	e = http.ListenAndServe(":"+config.PORT, nil)
