@@ -72,7 +72,7 @@ func get_info(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		hostname = "<unknown>"
 	}
-	w.Write([]byte(fmt.Sprintf("%s (%s) on %s: your IP %s\n", iam, GitDescribe, hostname, req.RemoteAddr)))
+	w.Write([]byte(fmt.Sprintf("Go %s (%s) on %s: your IP %s\n", iam, GitDescribe, hostname, req.RemoteAddr)))
 }
 
 func main() {
