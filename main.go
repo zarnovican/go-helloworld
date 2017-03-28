@@ -12,10 +12,10 @@ import (
 )
 
 type Config struct {
-	DOCKER_TASK_SLOT string `envconfig:"DOCKER_TASK_SLOT" default:"1"`
-	LOG_TARGET       string `envconfig:"LOG_TARGET" default:"console"`
-	PORT             string `envconfig:"PORT" default:"8080"`
-	SERVICE_NAME     string `envconfig:"SERVICE_NAME" default:"helloworld"`
+	TASK_SLOT    string `envconfig:"TASK_SLOT" default:"1"`
+	LOG_TARGET   string `envconfig:"LOG_TARGET" default:"console"`
+	PORT         string `envconfig:"PORT" default:"8080"`
+	SERVICE_NAME string `envconfig:"SERVICE_NAME" default:"helloworld"`
 }
 
 var config Config
@@ -65,10 +65,7 @@ func root(w http.ResponseWriter, req *http.Request) {
 }
 
 func get_info(w http.ResponseWriter, req *http.Request) {
-	iam := config.SERVICE_NAME
-	if config.DOCKER_TASK_SLOT != "" {
-		iam = iam + "." + config.DOCKER_TASK_SLOT
-	}
+	iam := config.SERVICE_NAME + "." + config.TASK_SLOT
 	hostname, err := os.Hostname()
 	if err != nil {
 		hostname = "<unknown>"
